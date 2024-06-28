@@ -1,0 +1,3 @@
+---
+default:
+  TESTING_FARM_PUBLIC_API: 'http://localhost:8001'

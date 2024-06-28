@@ -1,0 +1,195 @@
+import logging
+import time
+from datetime import datetime
+from typing import Optional
+
+import jwt
+import reflex as rx
+import requests
+
+from tft.ui.config import settings
+
+logging.basicConfig()
+logging.getLogger().setLevel(logging.DEBUG)
+
+
+class AuthorizedUser(rx.Base):
+    auth_id: str
+    auth_method: str
+    auth_name: str
+    ranch: list[str]
+    role: str
+    exp: int
+
+    def is_expired(self) -> bool:
+        return self.exp < time.time()
+
+
+class Token(rx.Base):
+    id: str
+    name: str
+    ranch: Optional[str]
+    role: str
+    created: datetime
+
+
+class TokenCreated(Token):
+    api_key: str
+
+
+class State(rx.State):
+    access_token: str = rx.LocalStorage()
+    # refresh_token: str = rx.LocalStorage()  # TODO
+    authorized_user: AuthorizedUser | None = None
+    tokens: list[Token] = []
+    tokens_loaded: bool = False
+    created_token: TokenCreated | None = None
+    create_token_form_token_name: str = ''
+
+    # 0 - do not do anything, stay hidden
+    # 1 - just created, should be shown
+    # 2 - currently being shown
+    show_created_token_state: int = 0
+
+    def login_github_callback(self):
+        logging.info('attempting to login via github')
+        response = requests.get(
+            f'{settings.TESTING_FARM_PUBLIC_API}/v0.1/login/github/callback?code={self.router.page.params["code"]}'
+        )
+
+        if response.status_code != 200:
+            return rx.toast(
+                f"Error {response.status_code} while logging in via github: {str(response.text)}",
+                position="top-right",
+                level="error",
+                timeout=20000,
+            )
+
+        logging.info(f'{response=}')
+        self.access_token = response.text
+        jwt_decoded = jwt.decode(self.access_token, options={"verify_signature": False})
+        self.authorized_user = AuthorizedUser(**jwt_decoded)
+        logging.info(f'{self.access_token=} {self.authorized_user=}')
+        return rx.redirect('/')
+
+    def login_fedora_callback(self):
+        logging.info('attempting to login via fedora')
+        response = requests.get(
+            f'{settings.TESTING_FARM_PUBLIC_API}/v0.1/login/fedora/callback?code={self.router.page.params["code"]}'
+        )
+
+        if response.status_code != 200:
+            return rx.toast(
+                f"Error {response.status_code} while logging in via fedora: {str(response.text)}",
+                position="top-right",
+                level="error",
+                timeout=20000,
+            )
+
+        logging.info(f'{response=}')
+        self.access_token = response.text
+        jwt_decoded = jwt.decode(self.access_token, options={"verify_signature": False})
+        self.authorized_user = AuthorizedUser(**jwt_decoded)
+        logging.info(f'{self.access_token=} {self.authorized_user=}')
+        return rx.redirect('/')
+
+    def logout(self):
+        rx.remove_local_storage('access_token')
+        self.authorized_user = None
+
+    @rx.var
+    def is_user_logged_in(self) -> bool:
+        return self.authorized_user is not None and not self.authorized_user.is_expired()
+
+    def start_loading_tokens(self) -> None:
+        self.tokens_loaded = False
+
+    def get_tokens(self):
+        if self.is_user_logged_in:
+            response = requests.get(
+                f'{settings.TESTING_FARM_PUBLIC_API}/v0.1/tokens',
+                headers={'Authorization': f'Bearer {self.access_token}'},
+            )
+            self.tokens_loaded = True
+
+            if response.status_code != 200:
+                return rx.toast(
+                    f"Error {response.status_code} while fetching tokens: {str(response.text)}",
+                    position="top-right",
+                    level="error",
+                    timeout=20000,
+                )
+
+            self.tokens = [Token(**token) for token in response.json()]
+            self.tokens.sort(key=lambda t: t.created, reverse=True)
+
+    def create_token(self, form_data):
+        if 'role' not in form_data:
+            form_data.update({'role': 'user'})
+
+        response = requests.post(
+            f'{settings.TESTING_FARM_PUBLIC_API}/v0.1/tokens',
+            json=form_data,
+            headers={'Authorization': f'Bearer {self.access_token}'},
+        )
+
+        if response.status_code != 200:
+            return rx.toast(
+                f"Error {response.status_code} while creating token: {str(response.text)}",
+                position="top-right",
+                level="error",
+                timeout=20000,
+            )
+
+        self.created_token = TokenCreated(**response.json())
+        self.show_created_token_state = 1
+        return rx.redirect('/')
+
+    @rx.var
+    def create_token_form_invalid(self) -> bool:
+        return len(self.create_token_form_token_name) == 0
+
+    def delete_token(self, token_id: str):
+        response = requests.delete(
+            f'{settings.TESTING_FARM_PUBLIC_API}/v0.1/tokens/{token_id}',
+            headers={'Authorization': f'Bearer {self.access_token}'},
+        )
+
+        if response.status_code != 200:
+            return rx.toast(
+                f"Error {response.status_code} while deleting token: {str(response.text)}",
+                position="top-right",
+                level="error",
+                timeout=20000,
+            )
+
+        self.tokens = [token for token in self.tokens if token.id != token_id]
+        return rx.toast(f"Token {token_id} was successfully deleted.", position="top-right", level="success")
+
+    def rotate_show_created_token_state(self):
+        if self.show_created_token_state == 1:
+            self.show_created_token_state = 2
+        elif self.show_created_token_state == 2:
+            self.show_created_token_state = 0
+
+    @rx.var
+    def ranch_redhat_allowed(self) -> bool:
+        if self.authorized_user and self.authorized_user.ranch:
+            return 'redhat' in self.authorized_user.ranch
+        return False
+
+    @rx.var
+    def ranch_public_allowed(self) -> bool:
+        if self.authorized_user and self.authorized_user.ranch:
+            return 'public' in self.authorized_user.ranch
+        return False
+
+    @rx.var
+    def role_admin(self) -> bool:
+        if self.authorized_user:
+            return 'admin' in self.authorized_user.role
+        return False
+
+    @rx.var
+    def show_created_token(self) -> bool:
+        return self.show_created_token_state == 2
