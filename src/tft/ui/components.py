@@ -3,6 +3,106 @@ import reflex as rx
 from tft.ui import State, Token
 
 
+def navbar() -> rx.Component:
+    return rx.fragment(
+        rx.hstack(
+            rx.box(
+                rx.hstack(
+                    rx.link(
+                        rx.image(
+                            src="https://gitlab.com/uploads/-/system/group/avatar/5515434/tft-logo.png",
+                            width="64px",
+                            height="auto",
+                        ),
+                        href='/',
+                    ),
+                    rx.link(rx.text('Home', size="5", weight="medium"), href='/'),
+                    rx.link(
+                        rx.hstack(
+                            rx.text('Docs', size="5", weight="medium"),
+                            rx.icon(tag='external-link', size=20),
+                            spacing='2',
+                            align_items='center',
+                        ),
+                        href='https://docs.testing-farm.io/',
+                        is_external=True,
+                    ),
+                    rx.link(
+                        rx.hstack(
+                            rx.text('API', size="5", weight="medium"),
+                            rx.icon(tag='external-link', size=20),
+                            spacing='2',
+                            align_items='center',
+                        ),
+                        href='https://api.testing-farm.io/',
+                        is_external=True,
+                    ),
+                    spacing="8",
+                    align_items="center",
+                ),
+                margin="32px",
+            ),
+            rx.box(
+                rx.cond(
+                    State.is_hydrated,
+                    rx.cond(
+                        State.is_user_logged_in,
+                        rx.drawer.root(
+                            rx.drawer.trigger(
+                                rx.button(rx.icon(tag="circle-user-round", size=40), variant="ghost", round="full")
+                            ),
+                            rx.drawer.overlay(z_index="5"),
+                            rx.drawer.portal(
+                                rx.drawer.content(
+                                    rx.vstack(
+                                        rx.hstack(
+                                            rx.color_mode.button(),
+                                            rx.box(
+                                                rx.drawer.close(
+                                                    rx.box(rx.button(rx.icon(tag="x", size=20), variant='ghost'))
+                                                ),
+                                                align='end',
+                                            ),
+                                            align_items="center",
+                                            width="100%",
+                                            justify="between",
+                                        ),
+                                        rx.text(
+                                            f'Signed in as {State.authorized_user.auth_name} via '
+                                            f'{State.authorized_user.auth_method}.'
+                                        ),
+                                        rx.link(
+                                            rx.flex(rx.icon(tag="key-round"), rx.text('Your Tokens'), spacing='2'),
+                                            href='/tokens',
+                                        ),
+                                        rx.link(
+                                            rx.flex(rx.icon(tag="log-out"), rx.text('Sign out'), spacing='2'),
+                                            on_click=State.logout,
+                                        ),
+                                    ),
+                                    height="100%",
+                                    width="250px",
+                                    padding="24px",
+                                    background_color=rx.color_mode_cond(light="white", dark="black"),
+                                    direction="column",
+                                    left='calc(100% - 250px);',
+                                ),
+                            ),
+                            direction="right",
+                        ),
+                        rx.link(rx.button('Sign in', width="150px"), href='/signin'),
+                    ),
+                ),
+                align="end",
+                margin="32px",
+            ),
+            justify="between",
+            align_items="center",
+        ),
+        rx.divider(),
+    )
+
+
 def create_token_dialog() -> rx.Component:
     return rx.alert_dialog.root(
         rx.alert_dialog.trigger(

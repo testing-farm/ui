@@ -60,7 +60,6 @@ class State(rx.State):
         if response.status_code != 200:
             return rx.toast(
                 f"Error {response.status_code} while logging in via github: {str(response.text)}",
-                position="top-right",
                 level="error",
                 timeout=20000,
             )
@@ -81,7 +80,6 @@ class State(rx.State):
         if response.status_code != 200:
             return rx.toast(
                 f"Error {response.status_code} while logging in via fedora: {str(response.text)}",
-                position="top-right",
                 level="error",
                 timeout=20000,
             )
@@ -96,6 +94,7 @@ class State(rx.State):
     def logout(self):
         rx.remove_local_storage('access_token')
         self.authorized_user = None
+        return rx.redirect('/')
 
     @rx.var
     def is_user_logged_in(self) -> bool:
@@ -115,7 +114,6 @@ class State(rx.State):
             if response.status_code != 200:
                 return rx.toast(
                     f"Error {response.status_code} while fetching tokens: {str(response.text)}",
-                    position="top-right",
                     level="error",
                     timeout=20000,
                 )
@@ -136,14 +134,13 @@ class State(rx.State):
         if response.status_code != 200:
             return rx.toast(
                 f"Error {response.status_code} while creating token: {str(response.text)}",
-                position="top-right",
                 level="error",
                 timeout=20000,
             )
 
         self.created_token = TokenCreated(**response.json())
         self.show_created_token_state = 1
-        return rx.redirect('/')
+        return rx.redirect('/tokens')
 
     @rx.var
     def create_token_form_invalid(self) -> bool:
@@ -158,13 +155,12 @@ class State(rx.State):
         if response.status_code != 200:
             return rx.toast(
                 f"Error {response.status_code} while deleting token: {str(response.text)}",
-                position="top-right",
                 level="error",
                 timeout=20000,
             )
 
         self.tokens = [token for token in self.tokens if token.id != token_id]
-        return rx.toast(f"Token {token_id} was successfully deleted.", position="top-right", level="success")
+        return rx.toast(f"Token {token_id} was successfully deleted.", level="success")
 
     def rotate_show_created_token_state(self):
         if self.show_created_token_state == 1:
