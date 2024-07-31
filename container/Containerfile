@@ -1,0 +1,27 @@
+FROM fedora:40
+
+COPY dist/tft_ui*.whl requirements.txt .
+
+RUN mkdir -p /code/assets
+RUN mkdir -p /code/src
+
+COPY assets /code/assets/
+COPY rxconfig.py /code/
+COPY src/src.py /code/src
+
+RUN dnf install -y unzip python3-pip
+RUN curl -fsSL https://bun.sh/install | bash
+
+RUN pip install -r requirements.txt --no-deps && \
+    pip install tft_ui*.whl && \
+    rm -f tft_ui*.whl requirements.txt
+
+ARG SETTINGS_FILE="/etc/testing-farm/ui/settings.yaml"
+ENV SETTINGS_FILE="$SETTINGS_FILE"
+ENV SETTINGS_FILE_FOR_DYNACONF="$SETTINGS_FILE"
+COPY --chmod=644 settings.yaml $SETTINGS_FILE
+
+WORKDIR /code
+
+ENTRYPOINT ["reflex"]
+CMD ["run", "--env", "prod"]

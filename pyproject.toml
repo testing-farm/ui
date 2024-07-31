@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "ui"
+name = "tft-ui"
 version = "0.1.0"
-description = ""
+description = "Testing Farm UI."
 authors = ["Jan Havlin <jhavlin@redhat.com>"]
 readme = "README.md"
 
@@ -12,6 +12,7 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.11"
 reflex = "^0.5.4"
+uvicorn =  {extras = ["standard"], version = "^0.20.0"}
 pyjwt = "^2.8.0"
 dynaconf = "^3.2.5"
 

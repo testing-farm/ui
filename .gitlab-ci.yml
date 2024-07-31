@@ -1,0 +1,59 @@
+---
+
+stages:
+  - tests
+  - deploy
+
+default:
+  image: quay.io/testing-farm/python-ci-image:2023-11-03-721cf348
+
+workflow:
+  rules:
+    # for merge requests
+    - if: $CI_MERGE_REQUEST_ID
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+# templates
+.quay:
+  # newer buildah is broken in AWS EKS
+  image: quay.io/buildah/stable:v1.29.0
+  before_script:
+    - buildah login -u="testing-farm+tftbot" -p="$QUAY_TOKEN" quay.io
+
+#
+# Test container image build, login and push the image to `quay.io`
+#
+container:
+  stage: tests
+  extends: .quay
+  variables:
+    GOSS_PATH: /usr/bin/goss
+    GOSS_DOWNLOAD_URL: https://github.com/goss-org/goss/releases/download/v0.3.21
+  script:
+    - dnf -y install make python3.9 podman-docker
+    - curl -sSL https://install.python-poetry.org | python3 - --version 1.4.2
+    - export PATH="/root/.local/bin:$PATH"
+    - IMAGE_TAG=$CI_COMMIT_SHORT_SHA make container/build
+    - IMAGE_TAG=$CI_COMMIT_SHORT_SHA make container/push
+
+#
+# Push to quay on merge
+#
+push-to-quay:
+  stage: deploy
+  extends: .quay
+  script:
+    - buildah pull quay.io/testing-farm/ui:$CI_COMMIT_SHORT_SHA
+    - buildah tag quay.io/testing-farm/ui:$CI_COMMIT_SHORT_SHA quay.io/testing-farm/ui:latest
+    - buildah push quay.io/testing-farm/ui:latest
+  only:
+    - main
+
+#
+# Run pre-commit
+#
+pre-commit:
+  stage: tests
+  script:
+    - pip install pre-commit
+    - pre-commit run --all-files
