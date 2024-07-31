@@ -140,3 +140,50 @@ def home() -> rx.Component:
             ),
         ),
     )
+
+
+def user_settings() -> rx.Component:
+    return rx.box(
+        navbar(),
+        rx.container(
+            rx.cond(
+                State.is_hydrated,
+                rx.cond(
+                    State.is_user_logged_in,
+                    rx.vstack(
+                        rx.heading("Your account settings", size="5"),
+                        rx.alert_dialog.root(
+                            rx.alert_dialog.trigger(
+                                rx.button(rx.icon(tag="user-x"), "Delete account", color_scheme="red")
+                            ),
+                            rx.alert_dialog.content(
+                                rx.alert_dialog.title("Delete your Testing Farm account"),
+                                rx.alert_dialog.description(
+                                    "Are you sure? This action cannot be undone.",
+                                ),
+                                rx.flex(
+                                    rx.alert_dialog.cancel(
+                                        rx.button(
+                                            "Cancel",
+                                            color_scheme="gray",
+                                        ),
+                                    ),
+                                    rx.alert_dialog.action(
+                                        rx.alert_dialog.action(
+                                            rx.button(
+                                                "Delete account",
+                                                color_scheme="red",
+                                                variant="solid",
+                                                on_click=State.delete_user,
+                                            ),
+                                        ),
+                                    ),
+                                    spacing="3",
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    )

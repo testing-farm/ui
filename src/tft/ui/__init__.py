@@ -162,6 +162,10 @@ class State(rx.State):
         self.tokens = [token for token in self.tokens if token.id != token_id]
         return rx.toast(f"Token {token_id} was successfully deleted.", level="success")
 
+    def delete_user(self):
+        print('Delete me')
+        # TODO: implement
+
     def rotate_show_created_token_state(self):
         if self.show_created_token_state == 1:
             self.show_created_token_state = 2

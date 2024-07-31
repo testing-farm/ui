@@ -40,7 +40,9 @@ def navbar() -> rx.Component:
                     spacing="8",
                     align_items="center",
                 ),
-                margin="32px",
+                padding_left="24px",
+                padding_top="16px",
+                padding_bottom="16px",
             ),
             rx.box(
                 rx.cond(
@@ -49,7 +51,11 @@ def navbar() -> rx.Component:
                         State.is_user_logged_in,
                         rx.drawer.root(
                             rx.drawer.trigger(
-                                rx.button(rx.icon(tag="circle-user-round", size=40), variant="ghost", round="full")
+                                rx.button(
+                                    rx.icon(tag="circle-user-round", size=40, stroke_width=1.5),
+                                    variant="ghost",
+                                    round="full",
+                                )
                             ),
                             rx.drawer.overlay(z_index="5"),
                             rx.drawer.portal(
@@ -76,6 +82,10 @@ def navbar() -> rx.Component:
                                             href='/tokens',
                                         ),
                                         rx.link(
+                                            rx.flex(rx.icon(tag="settings"), rx.text('Settings'), spacing='2'),
+                                            href='/settings',
+                                        ),
+                                        rx.link(
                                             rx.flex(rx.icon(tag="log-out"), rx.text('Sign out'), spacing='2'),
                                             on_click=State.logout,
                                         ),
@@ -94,7 +104,9 @@ def navbar() -> rx.Component:
                     ),
                 ),
                 align="end",
-                margin="32px",
+                padding_right="32px",
+                padding_top="16px",
+                padding_bottom="16px",
             ),
             justify="between",
             align_items="center",
