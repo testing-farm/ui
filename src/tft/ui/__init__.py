@@ -53,16 +53,15 @@ class State(rx.State):
 
     def login_github_callback(self):
         logging.info('attempting to login via github')
+        if not "code" in self.router.page.params:
+            return rx.redirect('/signin')
+
         response = requests.get(
             f'{settings.TESTING_FARM_PUBLIC_API}/v0.1/login/github/callback?code={self.router.page.params["code"]}'
         )
 
         if response.status_code != 200:
-            return rx.toast(
-                f"Error {response.status_code} while logging in via github: {str(response.text)}",
-                level="error",
-                timeout=20000,
-            )
+            return rx.redirect('/login/github/error')
 
         logging.info(f'{response=}')
         self.access_token = response.text
@@ -73,16 +72,15 @@ class State(rx.State):
 
     def login_fedora_callback(self):
         logging.info('attempting to login via fedora')
+        if not "code" in self.router.page.params:
+            return rx.redirect('/signin')
+
         response = requests.get(
             f'{settings.TESTING_FARM_PUBLIC_API}/v0.1/login/fedora/callback?code={self.router.page.params["code"]}'
         )
 
         if response.status_code != 200:
-            return rx.toast(
-                f"Error {response.status_code} while logging in via fedora: {str(response.text)}",
-                level="error",
-                timeout=20000,
-            )
+            return rx.redirect('/login/fedora/error')
 
         logging.info(f'{response=}')
         self.access_token = response.text

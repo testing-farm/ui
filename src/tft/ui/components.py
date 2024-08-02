@@ -49,7 +49,11 @@ def navbar() -> rx.Component:
                         State.is_user_logged_in,
                         rx.drawer.root(
                             rx.drawer.trigger(
-                                rx.button(rx.icon(tag="circle-user-round", size=40), variant="ghost", round="full")
+                                rx.button(
+                                    rx.icon(tag="circle-user-round", size=40, stroke_width=1.5),
+                                    variant="ghost",
+                                    round="full",
+                                )
                             ),
                             rx.drawer.overlay(z_index="5"),
                             rx.drawer.portal(

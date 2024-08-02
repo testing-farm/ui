@@ -1,7 +1,14 @@
 import reflex as rx
 
 from tft.ui import State
-from tft.ui.pages import home, sign_in, signing_in, tokens
+from tft.ui.pages import (
+    home,
+    sign_in,
+    sign_in_fedora_error,
+    sign_in_github_error,
+    signing_in,
+    tokens,
+)
 
 app = rx.App()
 app.add_page(home, route='/', title="Testing Farm")
@@ -12,5 +19,7 @@ app.add_page(
     route='/tokens',
 )
 app.add_page(sign_in, route='/signin', title="Testing Farm")
-app.add_page(signing_in, route='/login/github/callback', on_load=State.login_github_callback)
-app.add_page(signing_in, route='/login/fedora/callback', on_load=State.login_fedora_callback)
+app.add_page(signing_in, route='/login/github/callback', on_load=State.login_github_callback, title="Testing Farm")
+app.add_page(sign_in_github_error, route='/login/github/error', title="Testing Farm")
+app.add_page(signing_in, route='/login/fedora/callback', on_load=State.login_fedora_callback, title="Testing Farm")
+app.add_page(sign_in_fedora_error, route='/login/fedora/error', title="Testing Farm")

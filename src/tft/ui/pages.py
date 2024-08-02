@@ -107,6 +107,64 @@ def signing_in() -> rx.Component:
     return rx.container(rx.text('Signing in...'))
 
 
+def sign_in_github_error() -> rx.Component:
+    return rx.box(
+        navbar(),
+        rx.container(
+            rx.heading('Error signing in via GitHub account'),
+            rx.flex(
+                rx.text('You must be an admin in the'),
+                rx.link('testing-farm', href='https://github.com/orgs/testing-farm', is_external=True),
+                rx.text('organization.'),
+                spacing='1',
+            ),
+            rx.flex(
+                rx.text('Go to'),
+                rx.link(
+                    rx.text('Testing Farm onboarding docs'),
+                    href='https://docs.testing-farm.io/Testing%20Farm/0.1/onboarding.html',
+                    is_external=True,
+                ),
+                rx.text('for more information.'),
+                spacing='1',
+            ),
+        ),
+    )
+
+
+def sign_in_fedora_error() -> rx.Component:
+    return rx.box(
+        navbar(),
+        rx.container(
+            rx.heading('Error signing in via Fedora account'),
+            rx.flex(
+                rx.text('You must be a part of either'),
+                rx.link(
+                    'testing-farm', href='https://accounts.fedoraproject.org/group/testing-farm/', is_external=True
+                ),
+                rx.text('or'),
+                rx.link(
+                    'fedora-contributor',
+                    href='https://accounts.fedoraproject.org/group/fedora-contributor/',
+                    is_external=True,
+                ),
+                rx.text('group.'),
+                spacing='1',
+            ),
+            rx.flex(
+                rx.text('Go to'),
+                rx.link(
+                    rx.text('Testing Farm onboarding docs'),
+                    href='https://docs.testing-farm.io/Testing%20Farm/0.1/onboarding.html',
+                    is_external=True,
+                ),
+                rx.text('for more information.'),
+                spacing='1',
+            ),
+        ),
+    )
+
+
 def home() -> rx.Component:
     return rx.box(
         navbar(),
