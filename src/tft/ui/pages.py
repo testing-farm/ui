@@ -83,15 +83,23 @@ def sign_in() -> rx.Component:
                 rx.link(
                     rx.button(
                         rx.image(src="/fedora.png", width="24px", height="auto"),
-                        "Sign in with Fedora",
+                        "Sign in with Fedora account",
                         width="300px",
                     ),
                     href=f"{settings.TESTING_FARM_PUBLIC_API}/v0.1/login/fedora",
                 ),
                 rx.link(
                     rx.button(
+                        rx.image(src="/redhat.png", width="24px", height="auto"),
+                        "Sign in with Red Hat account",
+                        width="300px",
+                    ),
+                    href=f"{settings.TESTING_FARM_PUBLIC_API}/v0.1/login/redhat",
+                ),
+                rx.link(
+                    rx.button(
                         rx.icon(tag="github"),
-                        "Sign in as admin with GitHub",
+                        "Sign in as admin with GitHub account",
                         width="300px",
                         variant="ghost",
                     ),
@@ -151,6 +159,25 @@ def sign_in_fedora_error() -> rx.Component:
                 rx.text('group.'),
                 spacing='1',
             ),
+            rx.flex(
+                rx.text('Go to'),
+                rx.link(
+                    rx.text('Testing Farm onboarding docs'),
+                    href='https://docs.testing-farm.io/Testing%20Farm/0.1/onboarding.html',
+                    is_external=True,
+                ),
+                rx.text('for more information.'),
+                spacing='1',
+            ),
+        ),
+    )
+
+
+def sign_in_redhat_error() -> rx.Component:
+    return rx.box(
+        navbar(),
+        rx.container(
+            rx.heading('Error signing in via Red Hat account'),
             rx.flex(
                 rx.text('Go to'),
                 rx.link(

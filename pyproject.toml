@@ -11,7 +11,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.11"
-reflex = "^0.5.4"
+reflex = "^0.6"
 uvicorn =  {extras = ["standard"], version = "^0.20.0"}
 pyjwt = "^2.8.0"
 dynaconf = "^3.2.5"

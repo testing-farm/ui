@@ -89,6 +89,25 @@ class State(rx.State):
         logging.info(f'{self.access_token=} {self.authorized_user=}')
         return rx.redirect('/')
 
+    def login_redhat_callback(self):
+        logging.info('attempting to login via redhat')
+        if not "code" in self.router.page.params:
+            return rx.redirect('/signin')
+
+        response = requests.get(
+            f'{settings.TESTING_FARM_PUBLIC_API}/v0.1/login/redhat/callback?code={self.router.page.params["code"]}'
+        )
+
+        if response.status_code != 200:
+            return rx.redirect('/login/redhat/error')
+
+        logging.info(f'{response=}')
+        self.access_token = response.text
+        jwt_decoded = jwt.decode(self.access_token, options={"verify_signature": False})
+        self.authorized_user = AuthorizedUser(**jwt_decoded)
+        logging.info(f'{self.access_token=} {self.authorized_user=}')
+        return rx.redirect('/')
+
     def logout(self):
         rx.remove_local_storage('access_token')
         self.authorized_user = None

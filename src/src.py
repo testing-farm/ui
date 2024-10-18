@@ -6,6 +6,7 @@ from tft.ui.pages import (
     sign_in,
     sign_in_fedora_error,
     sign_in_github_error,
+    sign_in_redhat_error,
     signing_in,
     tokens,
 )
@@ -23,3 +24,5 @@ app.add_page(signing_in, route='/login/github/callback', on_load=State.login_git
 app.add_page(sign_in_github_error, route='/login/github/error', title="Testing Farm")
 app.add_page(signing_in, route='/login/fedora/callback', on_load=State.login_fedora_callback, title="Testing Farm")
 app.add_page(sign_in_fedora_error, route='/login/fedora/error', title="Testing Farm")
+app.add_page(signing_in, route='/login/redhat/callback', on_load=State.login_redhat_callback, title="Testing Farm")
+app.add_page(sign_in_redhat_error, route='/login/redhat/error', title="Testing Farm")
