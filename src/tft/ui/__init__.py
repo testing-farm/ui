@@ -68,7 +68,7 @@ class State(rx.State):
         jwt_decoded = jwt.decode(self.access_token, options={"verify_signature": False})
         self.authorized_user = AuthorizedUser(**jwt_decoded)
         logging.info(f'{self.access_token=} {self.authorized_user=}')
-        return rx.redirect('/')
+        return rx.redirect('/tokens')
 
     def login_fedora_callback(self):
         logging.info('attempting to login via fedora')
@@ -87,7 +87,7 @@ class State(rx.State):
         jwt_decoded = jwt.decode(self.access_token, options={"verify_signature": False})
         self.authorized_user = AuthorizedUser(**jwt_decoded)
         logging.info(f'{self.access_token=} {self.authorized_user=}')
-        return rx.redirect('/')
+        return rx.redirect('/tokens')
 
     def login_redhat_callback(self):
         logging.info('attempting to login via redhat')
@@ -106,7 +106,7 @@ class State(rx.State):
         jwt_decoded = jwt.decode(self.access_token, options={"verify_signature": False})
         self.authorized_user = AuthorizedUser(**jwt_decoded)
         logging.info(f'{self.access_token=} {self.authorized_user=}')
-        return rx.redirect('/')
+        return rx.redirect('/tokens')
 
     def logout(self):
         rx.remove_local_storage('access_token')
