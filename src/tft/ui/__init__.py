@@ -1,6 +1,6 @@
 import logging
 import time
-from datetime import datetime
+from datetime import date, datetime
 from typing import Optional
 
 import jwt
@@ -31,10 +31,23 @@ class Token(rx.Base):
     ranch: Optional[str]
     role: str
     created: datetime
+    expiration_date: Optional[date] = None
 
 
 class TokenCreated(Token):
     api_key: str
+
+
+def _get_error_message(response: requests.Response) -> str:
+    """Extract error message from API response."""
+    try:
+        data = response.json()
+        if isinstance(data, dict) and 'message' in data:
+            return data['message']
+    except ValueError:
+        # Raised if response is not JSON-decodable
+        pass
+    return response.text
 
 
 class State(rx.State):
@@ -45,6 +58,7 @@ class State(rx.State):
     tokens_loaded: bool = False
     created_token: TokenCreated | None = None
     create_token_form_token_name: str = ''
+    create_token_form_expiration_date: str = ''
 
     # 0 - do not do anything, stay hidden
     # 1 - just created, should be shown
@@ -130,9 +144,9 @@ class State(rx.State):
 
             if response.status_code != 200:
                 return rx.toast(
-                    f"Error {response.status_code} while fetching tokens: {str(response.text)}",
+                    f"Error {response.status_code} while fetching tokens: {_get_error_message(response)}",
                     level="error",
-                    timeout=20000,
+                    duration=20000,
                 )
 
             self.tokens = [Token(**token) for token in response.json()]
@@ -142,6 +156,10 @@ class State(rx.State):
         if 'role' not in form_data:
             form_data.update({'role': 'user'})
 
+        # Set expiration_date to null if not provided
+        if not form_data.get('expiration_date'):
+            form_data['expiration_date'] = None
+
         response = requests.post(
             f'{settings.TESTING_FARM_PUBLIC_API}/v0.1/tokens',
             json=form_data,
@@ -150,9 +168,9 @@ class State(rx.State):
 
         if response.status_code != 200:
             return rx.toast(
-                f"Error {response.status_code} while creating token: {str(response.text)}",
+                f"Error {response.status_code} while creating token: {_get_error_message(response)}",
                 level="error",
-                timeout=20000,
+                duration=20000,
             )
 
         self.created_token = TokenCreated(**response.json())
@@ -171,9 +189,9 @@ class State(rx.State):
 
         if response.status_code != 200:
             return rx.toast(
-                f"Error {response.status_code} while deleting token: {str(response.text)}",
+                f"Error deleting token: {_get_error_message(response)}",
                 level="error",
-                timeout=20000,
+                duration=20000,
             )
 
         self.tokens = [token for token in self.tokens if token.id != token_id]

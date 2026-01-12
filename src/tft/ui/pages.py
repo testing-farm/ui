@@ -56,6 +56,7 @@ def tokens() -> rx.Component:
                                             rx.table.column_header_cell("Ranch"),
                                             rx.table.column_header_cell("Role"),
                                             rx.table.column_header_cell("Created"),
+                                            rx.table.column_header_cell("Expires"),
                                             rx.table.column_header_cell("Delete"),
                                         ),
                                     ),

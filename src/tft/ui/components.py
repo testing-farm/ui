@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 import reflex as rx
 
 from tft.ui import State, Token
@@ -159,6 +161,15 @@ def create_token_dialog() -> rx.Component:
                                     ),
                                 ),
                             ),
+                            rx.form.label("Expiration Date (max is 1 year from now)"),
+                            rx.input(
+                                type="date",
+                                name="expiration_date",
+                                on_change=State.set_create_token_form_expiration_date,
+                                min=str(date.today()),
+                                max=str(date.today() + timedelta(days=364)),
+                                value=str(date.today() + timedelta(days=364)),
+                            ),
                             rx.hstack(
                                 rx.alert_dialog.cancel(rx.button("Cancel", color_scheme="gray")),
                                 rx.form.submit(
@@ -187,6 +198,13 @@ def token_table_row(token: Token):
         rx.table.cell(token.role),
         rx.table.cell(rx.moment(token.created, format="YYYY-MM-DD HH:mm:ss")),
         rx.table.cell(
+            rx.cond(
+                token.expiration_date,
+                rx.moment(token.expiration_date, format="YYYY-MM-DD"),
+                rx.text("Never"),
+            )
+        ),
+        rx.table.cell(
             rx.hstack(
                 rx.alert_dialog.root(
                     rx.alert_dialog.trigger(rx.button(rx.icon(tag="trash-2", size=20), color_scheme="red", size="1")),
@@ -202,6 +220,7 @@ def token_table_row(token: Token):
                                         rx.table.column_header_cell("Ranch"),
                                         rx.table.column_header_cell("Role"),
                                         rx.table.column_header_cell("Created"),
+                                        rx.table.column_header_cell("Expires"),
                                     )
                                 ),
                                 rx.table.body(
@@ -211,6 +230,13 @@ def token_table_row(token: Token):
                                         rx.table.cell(token.ranch),
                                         rx.table.cell(token.role),
                                         rx.table.cell(rx.moment(token.created, format="YYYY-MM-DD HH:mm:ss")),
+                                        rx.table.cell(
+                                            rx.cond(
+                                                token.expiration_date,
+                                                rx.moment(token.expiration_date, format="YYYY-MM-DD"),
+                                                rx.text("Never"),
+                                            )
+                                        ),
                                     )
                                 ),
                             ),
