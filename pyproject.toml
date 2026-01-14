@@ -3,7 +3,7 @@ name = "tft-ui"
 version = "0.1.0"
 description = "Testing Farm UI."
 authors = ["Jan Havlin <jhavlin@redhat.com>"]
-readme = "README.md"
+readme = "README.adoc"
 
 packages = [
   { include = "tft", from = "src" }

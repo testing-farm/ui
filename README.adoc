@@ -1,0 +1,35 @@
+= Testing Farm UI
+
+A web UI for Testing Farm.
+
+== Installation
+
+NOTE: You might need to install the `libffi-devel` package first.
+
+[source,bash]
+....
+poetry install
+....
+
+== Testing
+
+[source,bash]
+....
+poetry run tox
+....
+
+== Running Locally
+
+[source,bash]
+....
+poetry run reflex run
+....
+
+== Mock Logging
+
+To enable mock logging for local testing:
+
+[source,bash]
+....
+export TF_UI_ALLOW_MOCK_LOGIN=true
+....

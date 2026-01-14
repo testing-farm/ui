@@ -2,7 +2,7 @@ import reflex as rx
 
 from tft.ui import State
 from tft.ui.components import create_token_dialog, navbar, token_table_row
-from tft.ui.config import settings
+from tft.ui.config import is_mock_login_allowed, settings
 
 
 def tokens() -> rx.Component:
@@ -106,6 +106,18 @@ def sign_in() -> rx.Component:
                     ),
                     href=f"{settings.TESTING_FARM_PUBLIC_API}/v0.1/login/github",
                 ),
+                rx.cond(
+                    is_mock_login_allowed(),
+                    rx.link(
+                        rx.button(
+                            rx.icon(tag="flask-conical"),
+                            "Sign in with Mock account",
+                            width="300px",
+                            variant="outline",
+                        ),
+                        href="/login/mock/callback",
+                    ),
+                ),
                 align_items="center",
             ),
         ),
@@ -187,6 +199,19 @@ def sign_in_redhat_error() -> rx.Component:
                     is_external=True,
                 ),
                 rx.text('for more information.'),
+                spacing='1',
+            ),
+        ),
+    )
+
+
+def sign_in_mock_error() -> rx.Component:
+    return rx.box(
+        navbar(),
+        rx.container(
+            rx.heading('Error signing in via Mock account'),
+            rx.flex(
+                rx.text('Mock login failed. Please check your local testing setup.'),
                 spacing='1',
             ),
         ),

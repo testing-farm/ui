@@ -1,11 +1,13 @@
 import reflex as rx
 
 from tft.ui import State
+from tft.ui.config import is_mock_login_allowed
 from tft.ui.pages import (
     home,
     sign_in,
     sign_in_fedora_error,
     sign_in_github_error,
+    sign_in_mock_error,
     sign_in_redhat_error,
     signing_in,
     tokens,
@@ -26,3 +28,7 @@ app.add_page(signing_in, route='/login/fedora/callback', on_load=State.login_fed
 app.add_page(sign_in_fedora_error, route='/login/fedora/error', title="Testing Farm")
 app.add_page(signing_in, route='/login/redhat/callback', on_load=State.login_redhat_callback, title="Testing Farm")
 app.add_page(sign_in_redhat_error, route='/login/redhat/error', title="Testing Farm")
+
+if is_mock_login_allowed():
+    app.add_page(signing_in, route='/login/mock/callback', on_load=State.login_mock_callback, title="Testing Farm")
+    app.add_page(sign_in_mock_error, route='/login/mock/error', title="Testing Farm")

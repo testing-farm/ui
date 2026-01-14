@@ -122,6 +122,21 @@ class State(rx.State):
         logging.info(f'{self.access_token=} {self.authorized_user=}')
         return rx.redirect('/tokens')
 
+    def login_mock_callback(self):
+        logging.info('attempting to login via mock')
+
+        response = requests.get(f'{settings.TESTING_FARM_PUBLIC_API}/v0.1/login/mock')
+
+        if response.status_code != 200:
+            return rx.redirect('/login/mock/error')
+
+        logging.info(f'{response=}')
+        self.access_token = response.text
+        jwt_decoded = jwt.decode(self.access_token, options={"verify_signature": False})
+        self.authorized_user = AuthorizedUser(**jwt_decoded)
+        logging.info(f'{self.access_token=} {self.authorized_user=}')
+        return rx.redirect('/tokens')
+
     def logout(self):
         rx.remove_local_storage('access_token')
         self.authorized_user = None
