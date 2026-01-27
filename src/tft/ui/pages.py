@@ -57,7 +57,7 @@ def tokens() -> rx.Component:
                                             rx.table.column_header_cell("Role"),
                                             rx.table.column_header_cell("Created"),
                                             rx.table.column_header_cell("Expires"),
-                                            rx.table.column_header_cell("Delete"),
+                                            rx.table.column_header_cell("Actions"),
                                         ),
                                     ),
                                     rx.table.body(rx.foreach(State.tokens, token_table_row)),
