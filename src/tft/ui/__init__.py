@@ -1,6 +1,6 @@
 import logging
 import time
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Optional
 
 import jwt
@@ -58,12 +58,30 @@ class State(rx.State):
     tokens_loaded: bool = False
     created_token: TokenCreated | None = None
     create_token_form_token_name: str = ''
-    create_token_form_expiration_date: str = ''
 
     # 0 - do not do anything, stay hidden
     # 1 - just created, should be shown
     # 2 - currently being shown
     show_created_token_state: int = 0
+
+    # Token regeneration state
+    regenerate_token_source: Token | None = None
+
+    # Expiration date input constraints (shared by create and regenerate forms)
+    @rx.var
+    def expiration_date_min(self) -> str:
+        """Minimum expiration date (today)."""
+        return date.today().isoformat()
+
+    @rx.var
+    def expiration_date_max(self) -> str:
+        """Maximum expiration date (1 year from now)."""
+        return (date.today() + timedelta(days=364)).isoformat()
+
+    @rx.var
+    def expiration_date_default(self) -> str:
+        """Default expiration date (1 year from now)."""
+        return (date.today() + timedelta(days=364)).isoformat()
 
     def login_github_callback(self):
         logging.info('attempting to login via github')
@@ -211,6 +229,44 @@ class State(rx.State):
 
         self.tokens = [token for token in self.tokens if token.id != token_id]
         return rx.toast(f"Token {token_id} was successfully deleted.", level="success")
+
+    def start_regenerate_token(self, token_id: str):
+        """Set the source token for regeneration."""
+        for token in self.tokens:
+            if token.id == token_id:
+                self.regenerate_token_source = token
+                break
+
+    def regenerate_token(self, form_data):
+        """Create a new token with the same parameters as the source token."""
+        if not self.regenerate_token_source:
+            return rx.toast("No token selected for regeneration.", level="error")
+
+        # Build form data from source token
+        regenerate_data = {
+            'name': self.regenerate_token_source.name,
+            'ranch': self.regenerate_token_source.ranch,
+            'role': self.regenerate_token_source.role,
+            'expiration_date': form_data.get('expiration_date') or None,
+        }
+
+        response = requests.post(
+            f'{settings.TESTING_FARM_PUBLIC_API}/v0.1/tokens',
+            json=regenerate_data,
+            headers={'Authorization': f'Bearer {self.access_token}'},
+        )
+
+        if response.status_code != 200:
+            return rx.toast(
+                f"Error {response.status_code} while regenerating token: {_get_error_message(response)}",
+                level="error",
+                duration=20000,
+            )
+
+        self.created_token = TokenCreated(**response.json())
+        self.show_created_token_state = 1
+        self.regenerate_token_source = None
+        return rx.redirect('/tokens')
 
     def rotate_show_created_token_state(self):
         if self.show_created_token_state == 1:

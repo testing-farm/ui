@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 
 import reflex as rx
 
@@ -165,10 +165,9 @@ def create_token_dialog() -> rx.Component:
                             rx.input(
                                 type="date",
                                 name="expiration_date",
-                                on_change=State.set_create_token_form_expiration_date,
-                                min=str(date.today()),
-                                max=str(date.today() + timedelta(days=364)),
-                                value=str(date.today() + timedelta(days=364)),
+                                min=State.expiration_date_min,
+                                max=State.expiration_date_max,
+                                default_value=State.expiration_date_default,
                             ),
                             rx.hstack(
                                 rx.alert_dialog.cancel(rx.button("Cancel", color_scheme="gray")),
@@ -190,7 +189,83 @@ def create_token_dialog() -> rx.Component:
     )
 
 
+def regenerate_token_dialog(token: Token) -> rx.Component:
+    """Dialog for regenerating an expired token with a new expiration date."""
+    return rx.tooltip(
+        rx.alert_dialog.root(
+            rx.alert_dialog.trigger(
+                rx.button(
+                    rx.icon(tag="refresh-cw", size=20),
+                    color_scheme="blue",
+                    size="1",
+                    on_click=State.start_regenerate_token(token.id),
+                ),
+            ),
+            rx.alert_dialog.content(
+                rx.alert_dialog.title("Regenerate token"),
+                rx.alert_dialog.description(
+                    rx.vstack(
+                        rx.text(
+                            "Create a new token with the same parameters. "
+                            "Only the expiration date will be different."
+                        ),
+                        rx.table.root(
+                            rx.table.header(
+                                rx.table.row(
+                                    rx.table.column_header_cell("Name"),
+                                    rx.table.column_header_cell("Ranch"),
+                                    rx.table.column_header_cell("Role"),
+                                )
+                            ),
+                            rx.table.body(
+                                rx.table.row(
+                                    rx.table.cell(token.name),
+                                    rx.table.cell(token.ranch),
+                                    rx.table.cell(token.role),
+                                )
+                            ),
+                        ),
+                        rx.form.root(
+                            rx.form.field(
+                                rx.flex(
+                                    rx.form.label("New Expiration Date (max is 1 year from now)"),
+                                    rx.input(
+                                        type="date",
+                                        name="expiration_date",
+                                        min=State.expiration_date_min,
+                                        max=State.expiration_date_max,
+                                        default_value=State.expiration_date_default,
+                                    ),
+                                    rx.hstack(
+                                        rx.alert_dialog.cancel(rx.button("Cancel", color_scheme="gray")),
+                                        rx.form.submit(
+                                            rx.button("Regenerate", color_scheme="blue"),
+                                            as_child=True,
+                                        ),
+                                    ),
+                                    direction="column",
+                                    spacing="2",
+                                    align="stretch",
+                                ),
+                            ),
+                            on_submit=State.regenerate_token,
+                            reset_on_submit=True,
+                        ),
+                        spacing="3",
+                        align="stretch",
+                    ),
+                ),
+            ),
+        ),
+        content="Regenerate token",
+    )
+
+
 def token_table_row(token: Token):
+    # Check if token is expired (has expiration_date and it's in the past)
+    today_str = str(date.today())
+    token_is_expired = token.expiration_date is not None and token.expiration_date.to(str) < today_str
+
     return rx.table.row(
         rx.table.row_header_cell(token.id),
         rx.table.cell(token.name),
@@ -200,18 +275,29 @@ def token_table_row(token: Token):
         rx.table.cell(
             rx.cond(
                 token.expiration_date,
-                rx.moment(token.expiration_date, format="YYYY-MM-DD"),
+                rx.hstack(
+                    rx.moment(token.expiration_date, format="YYYY-MM-DD"),
+                    rx.cond(
+                        token_is_expired,
+                        rx.badge("Expired", color_scheme="red"),
+                    ),
+                    spacing="2",
+                    align="center",
+                ),
                 rx.text("Never"),
             )
         ),
         rx.table.cell(
             rx.hstack(
+                # Regenerate button (always shown)
+                regenerate_token_dialog(token),
+                # Delete button (always shown)
                 rx.alert_dialog.root(
                     rx.alert_dialog.trigger(rx.button(rx.icon(tag="trash-2", size=20), color_scheme="red", size="1")),
                     rx.alert_dialog.content(
                         rx.alert_dialog.title("Delete token"),
                         rx.alert_dialog.description(
-                            "Are you sure? This action cannot be undone, you token will stop working immediatelly.",
+                            "Are you sure? This action cannot be undone, you token will stop working immediately.",
                             rx.table.root(
                                 rx.table.header(
                                     rx.table.row(
@@ -261,7 +347,8 @@ def token_table_row(token: Token):
                             spacing="3",
                         ),
                     ),
-                )
-            )
+                ),
+                spacing="2",
+            ),
         ),
     )
