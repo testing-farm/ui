@@ -2,3 +2,6 @@
 default:
   TESTING_FARM_PUBLIC_API: 'http://localhost:8001'
   ALLOW_MOCK_LOGIN: False
+
+development:
+  ALLOW_MOCK_LOGIN: True
