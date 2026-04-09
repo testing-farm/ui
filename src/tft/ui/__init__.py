@@ -238,7 +238,7 @@ class State(rx.State):
                 break
 
     def regenerate_token(self, form_data):
-        """Create a new token with the same parameters as the source token."""
+        """Regenerate the api_key of an existing token."""
         if not self.regenerate_token_source:
             return rx.toast("No token selected for regeneration.", level="error")
 
