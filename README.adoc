@@ -22,14 +22,9 @@ poetry run tox
 
 [source,bash]
 ....
-poetry run reflex run
+ENV_FOR_DYNACONF=development poetry run reflex run
 ....
 
 == Mock Logging
 
-To enable mock logging for local testing:
-
-[source,bash]
-....
-export TF_UI_ALLOW_MOCK_LOGIN=true
-....
+The `development` environment enables mock login for easier local testing.
