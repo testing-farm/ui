@@ -206,8 +206,8 @@ def regenerate_token_dialog(token: Token) -> rx.Component:
                 rx.alert_dialog.description(
                     rx.vstack(
                         rx.text(
-                            "Create a new token with the same parameters. "
-                            "Only the expiration date will be different."
+                            "Regenerate the token with a new expiration date. "
+                            "The token ID will be preserved."
                         ),
                         rx.table.root(
                             rx.table.header(
