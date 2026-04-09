@@ -242,16 +242,13 @@ class State(rx.State):
         if not self.regenerate_token_source:
             return rx.toast("No token selected for regeneration.", level="error")
 
-        # Build form data from source token
+        token_id = self.regenerate_token_source.id
         regenerate_data = {
-            'name': self.regenerate_token_source.name,
-            'ranch': self.regenerate_token_source.ranch,
-            'role': self.regenerate_token_source.role,
             'expiration_date': form_data.get('expiration_date') or None,
         }
 
         response = requests.post(
-            f'{settings.TESTING_FARM_PUBLIC_API}/v0.1/tokens',
+            f'{settings.TESTING_FARM_PUBLIC_API}/v0.1/tokens/{token_id}/regenerate',
             json=regenerate_data,
             headers={'Authorization': f'Bearer {self.access_token}'},
         )
