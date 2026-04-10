@@ -66,6 +66,7 @@ class State(rx.State):
 
     # Token regeneration state
     regenerate_token_source: Token | None = None
+    token_regenerated: bool = False
 
     # Expiration date input constraints (shared by create and regenerate forms)
     @rx.var
@@ -208,6 +209,7 @@ class State(rx.State):
 
         self.created_token = TokenCreated(**response.json())
         self.show_created_token_state = 1
+        self.token_regenerated = False
         return rx.redirect('/tokens')
 
     @rx.var
@@ -262,6 +264,7 @@ class State(rx.State):
 
         self.created_token = TokenCreated(**response.json())
         self.show_created_token_state = 1
+        self.token_regenerated = True
         self.regenerate_token_source = None
         return rx.redirect('/tokens')
 
