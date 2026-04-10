@@ -66,6 +66,7 @@ class State(rx.State):
 
     # Token regeneration state
     regenerate_token_source: Token | None = None
+    token_regenerated: bool = False
 
     # Expiration date input constraints (shared by create and regenerate forms)
     @rx.var
@@ -208,6 +209,7 @@ class State(rx.State):
 
         self.created_token = TokenCreated(**response.json())
         self.show_created_token_state = 1
+        self.token_regenerated = False
         return rx.redirect('/tokens')
 
     @rx.var
@@ -238,20 +240,17 @@ class State(rx.State):
                 break
 
     def regenerate_token(self, form_data):
-        """Create a new token with the same parameters as the source token."""
+        """Regenerate the api_key of an existing token."""
         if not self.regenerate_token_source:
             return rx.toast("No token selected for regeneration.", level="error")
 
-        # Build form data from source token
+        token_id = self.regenerate_token_source.id
         regenerate_data = {
-            'name': self.regenerate_token_source.name,
-            'ranch': self.regenerate_token_source.ranch,
-            'role': self.regenerate_token_source.role,
             'expiration_date': form_data.get('expiration_date') or None,
         }
 
         response = requests.post(
-            f'{settings.TESTING_FARM_PUBLIC_API}/v0.1/tokens',
+            f'{settings.TESTING_FARM_PUBLIC_API}/v0.1/tokens/{token_id}/regenerate',
             json=regenerate_data,
             headers={'Authorization': f'Bearer {self.access_token}'},
         )
@@ -265,6 +264,7 @@ class State(rx.State):
 
         self.created_token = TokenCreated(**response.json())
         self.show_created_token_state = 1
+        self.token_regenerated = True
         self.regenerate_token_source = None
         return rx.redirect('/tokens')
 

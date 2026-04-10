@@ -21,8 +21,13 @@ def tokens() -> rx.Component:
                                 State.show_created_token,
                                 rx.callout(
                                     rx.vstack(
-                                        "Your token was successfully created. Make sure to copy it now, "
-                                        "it won't be shown again.",
+                                        rx.cond(
+                                            State.token_regenerated,
+                                            "Your token was successfully regenerated. Make sure to copy it now, "
+                                            "it won't be shown again.",
+                                            "Your token was successfully created. Make sure to copy it now, "
+                                            "it won't be shown again.",
+                                        ),
                                         rx.table.root(
                                             rx.table.header(
                                                 rx.table.row(
