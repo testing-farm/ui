@@ -245,8 +245,13 @@ class State(rx.State):
             return rx.toast("No token selected for regeneration.", level="error")
 
         token_id = self.regenerate_token_source.id
+
+        grace_period_str = form_data.get('grace_period', '').strip()
+        grace_period = int(grace_period_str) if grace_period_str else None
+
         regenerate_data = {
             'expiration_date': form_data.get('expiration_date') or None,
+            'grace_period': grace_period,
         }
 
         response = requests.post(

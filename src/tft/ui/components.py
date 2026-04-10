@@ -233,6 +233,28 @@ def regenerate_token_dialog(token: Token) -> rx.Component:
                                         max=State.expiration_date_max,
                                         default_value=State.expiration_date_default,
                                     ),
+                                    rx.form.label("Previous Key Grace Period"),
+                                    rx.text(
+                                        "Keep the previous API key valid for a transition period "
+                                        "to avoid downtime during key rotation.",
+                                        size="1",
+                                        color="gray",
+                                    ),
+                                    rx.select.root(
+                                        rx.select.trigger(placeholder="No grace period"),
+                                        rx.select.content(
+                                            rx.select.group(
+                                                rx.select.item("No grace period", value=""),
+                                                rx.select.item("1 hour", value="3600"),
+                                                rx.select.item("6 hours", value="21600"),
+                                                rx.select.item("1 day", value="86400"),
+                                                rx.select.item("1 week", value="604800"),
+                                                rx.select.item("1 month", value="2592000"),
+                                            ),
+                                        ),
+                                        default_value="",
+                                        name="grace_period",
+                                    ),
                                     rx.hstack(
                                         rx.alert_dialog.cancel(rx.button("Cancel", color_scheme="gray")),
                                         rx.form.submit(
