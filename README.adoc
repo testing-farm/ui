@@ -27,4 +27,4 @@ ENV_FOR_DYNACONF=development poetry run reflex run
 
 == Mock Logging
 
-The `development` environment enables mock login for easier local testing.
+The `development` dynaconf environment enables mock login for easier local testing.
