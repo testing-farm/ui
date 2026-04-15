@@ -244,7 +244,7 @@ def regenerate_token_dialog(token: Token) -> rx.Component:
                                         rx.select.trigger(placeholder="No grace period"),
                                         rx.select.content(
                                             rx.select.group(
-                                                rx.select.item("No grace period", value="none"),
+                                                rx.select.item("No grace period", value="0"),
                                                 rx.select.item("1 hour", value="3600"),
                                                 rx.select.item("6 hours", value="21600"),
                                                 rx.select.item("1 day", value="86400"),
@@ -252,7 +252,7 @@ def regenerate_token_dialog(token: Token) -> rx.Component:
                                                 rx.select.item("1 month", value="2592000"),
                                             ),
                                         ),
-                                        default_value="none",
+                                        default_value="0",
                                         name="grace_period",
                                     ),
                                     rx.hstack(

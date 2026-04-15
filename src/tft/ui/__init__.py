@@ -255,7 +255,8 @@ class State(rx.State):
         token_id = self.regenerate_token_source.id
 
         grace_period_str = form_data.get('grace_period', '').strip()
-        grace_period = int(grace_period_str) if grace_period_str and grace_period_str != 'none' else None
+        grace_period = int(grace_period_str) if grace_period_str else 0
+        grace_period = grace_period if grace_period else None
 
         regenerate_data = {
             'expiration_date': form_data.get('expiration_date') or None,
