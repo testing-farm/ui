@@ -244,7 +244,7 @@ def regenerate_token_dialog(token: Token) -> rx.Component:
                                         rx.select.trigger(placeholder="No grace period"),
                                         rx.select.content(
                                             rx.select.group(
-                                                rx.select.item("No grace period", value=""),
+                                                rx.select.item("No grace period", value="none"),
                                                 rx.select.item("1 hour", value="3600"),
                                                 rx.select.item("6 hours", value="21600"),
                                                 rx.select.item("1 day", value="86400"),
@@ -252,7 +252,7 @@ def regenerate_token_dialog(token: Token) -> rx.Component:
                                                 rx.select.item("1 month", value="2592000"),
                                             ),
                                         ),
-                                        default_value="",
+                                        default_value="none",
                                         name="grace_period",
                                     ),
                                     rx.hstack(
@@ -286,24 +286,40 @@ def token_table_row(token: Token):
     token_is_expired = token.expiration_date is not None and token.expiration_date.to(str) < today_str
 
     return rx.table.row(
-        rx.table.row_header_cell(token.id),
-        rx.table.cell(token.name),
-        rx.table.cell(token.ranch),
-        rx.table.cell(token.role),
-        rx.table.cell(rx.moment(token.created, format="YYYY-MM-DD HH:mm:ss")),
+        rx.table.row_header_cell(token.id, white_space="nowrap"),
+        rx.table.cell(token.name, white_space="nowrap"),
+        rx.table.cell(token.ranch, white_space="nowrap"),
+        rx.table.cell(token.role, white_space="nowrap"),
+        rx.table.cell(rx.moment(token.created, format="YYYY-MM-DD HH:mm:ss"), white_space="nowrap"),
         rx.table.cell(
-            rx.cond(
-                token.expiration_date,
-                rx.hstack(
-                    rx.moment(token.expiration_date, format="YYYY-MM-DD"),
-                    rx.cond(
-                        token_is_expired,
-                        rx.badge("Expired", color_scheme="red"),
+            rx.vstack(
+                rx.cond(
+                    token.expiration_date,
+                    rx.hstack(
+                        rx.moment(token.expiration_date, format="YYYY-MM-DD"),
+                        rx.cond(
+                            token_is_expired,
+                            rx.badge("Expired", color_scheme="red"),
+                        ),
+                        spacing="2",
+                        align="center",
                     ),
-                    spacing="2",
-                    align="center",
+                    rx.text("Never"),
                 ),
-                rx.text("Never"),
+                rx.cond(
+                    token.previous_api_key_expiration_datetime,
+                    rx.text(
+                        "previous ",
+                        rx.moment(
+                            token.previous_api_key_expiration_datetime,
+                            format="YYYY-MM-DD HH:mm z",
+                        ),
+                        size="1",
+                        color="gray",
+                        white_space="nowrap",
+                    ),
+                ),
+                spacing="0",
             )
         ),
         rx.table.cell(

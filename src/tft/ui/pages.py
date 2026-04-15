@@ -75,7 +75,7 @@ def tokens() -> rx.Component:
                     ),
                 ),
             ),
-            width="100%",
+            size="4",
         ),
     )
 
