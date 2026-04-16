@@ -32,6 +32,7 @@ class Token(rx.Base):
     role: str
     created: datetime
     expiration_date: Optional[date] = None
+    previous_api_key_expiration_datetime: Optional[datetime] = None
 
 
 class TokenCreated(Token):
@@ -183,7 +184,14 @@ class State(rx.State):
                     duration=20000,
                 )
 
-            self.tokens = [Token(**token) for token in response.json()]
+            now = datetime.utcnow()
+            self.tokens = []
+            for token_data in response.json():
+                token = Token(**token_data)
+                # Clear expired grace periods so the UI doesn't show stale info
+                if token.previous_api_key_expiration_datetime and token.previous_api_key_expiration_datetime < now:
+                    token.previous_api_key_expiration_datetime = None
+                self.tokens.append(token)
             self.tokens.sort(key=lambda t: t.created, reverse=True)
 
     def create_token(self, form_data):
@@ -245,8 +253,14 @@ class State(rx.State):
             return rx.toast("No token selected for regeneration.", level="error")
 
         token_id = self.regenerate_token_source.id
+
+        grace_period_str = form_data.get('grace_period', '').strip()
+        grace_period = int(grace_period_str) if grace_period_str else 0
+        grace_period = grace_period if grace_period else None
+
         regenerate_data = {
             'expiration_date': form_data.get('expiration_date') or None,
+            'grace_period': grace_period,
         }
 
         response = requests.post(
