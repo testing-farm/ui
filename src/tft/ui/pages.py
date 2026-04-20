@@ -29,7 +29,7 @@ def tokens() -> rx.Component:
                                             "it won't be shown again.",
                                         ),
                                         rx.hstack(
-                                            rx.code(State.created_token.api_key, size="2", color_scheme="blue"),
+                                            rx.text(State.created_token.api_key, size="2", color="blue", weight="medium"),
                                             rx.icon_button(
                                                 rx.icon(tag="copy", size=14),
                                                 size="1",
