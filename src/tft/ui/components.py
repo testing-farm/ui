@@ -286,8 +286,41 @@ def token_table_row(token: Token):
     token_is_expired = token.expiration_date is not None and token.expiration_date.to(str) < today_str
 
     return rx.table.row(
-        rx.table.row_header_cell(token.id, white_space="nowrap"),
-        rx.table.cell(token.name, white_space="nowrap"),
+        rx.table.row_header_cell(
+            rx.popover.root(
+                rx.popover.trigger(
+                    rx.text(token.name, cursor="pointer", _hover={"text_decoration": "underline"}),
+                ),
+                rx.popover.content(
+                    rx.vstack(
+                        rx.text("Token ID", size="1", weight="bold", color="gray"),
+                        rx.hstack(
+                            rx.code(token.id, size="2"),
+                            rx.icon_button(
+                                rx.icon(tag="copy", size=14),
+                                size="1",
+                                variant="ghost",
+                                on_click=[rx.set_clipboard(token.id), rx.toast("Token ID copied to clipboard.")],
+                            ),
+                            align="center",
+                            spacing="2",
+                        ),
+                        rx.hstack(
+                            rx.icon(tag="triangle-alert", size=12, color="gray"),
+                            rx.text(
+                                "Not the token value — that is shown only at creation.",
+                                size="1",
+                                color="gray",
+                            ),
+                            align="center",
+                            spacing="1",
+                        ),
+                        spacing="2",
+                    ),
+                ),
+            ),
+            white_space="nowrap",
+        ),
         rx.table.cell(token.ranch, white_space="nowrap"),
         rx.table.cell(token.role, white_space="nowrap"),
         rx.table.cell(rx.moment(token.created, format="YYYY-MM-DD HH:mm:ss"), white_space="nowrap"),
@@ -312,7 +345,8 @@ def token_table_row(token: Token):
                         "previous ",
                         rx.moment(
                             token.previous_api_key_expiration_datetime,
-                            format="YYYY-MM-DD HH:mm z",
+                            format="YYYY-MM-DD HH:mm UTC",
+                            tz="UTC",
                         ),
                         size="1",
                         color="gray",
@@ -336,7 +370,6 @@ def token_table_row(token: Token):
                             rx.table.root(
                                 rx.table.header(
                                     rx.table.row(
-                                        rx.table.column_header_cell("ID"),
                                         rx.table.column_header_cell("Name"),
                                         rx.table.column_header_cell("Ranch"),
                                         rx.table.column_header_cell("Role"),
@@ -346,8 +379,12 @@ def token_table_row(token: Token):
                                 ),
                                 rx.table.body(
                                     rx.table.row(
-                                        rx.table.row_header_cell(token.id),
-                                        rx.table.cell(token.name),
+                                        rx.table.row_header_cell(
+                                            rx.tooltip(
+                                                rx.text(token.name),
+                                                content=f"Token ID: {token.id}",
+                                            ),
+                                        ),
                                         rx.table.cell(token.ranch),
                                         rx.table.cell(token.role),
                                         rx.table.cell(rx.moment(token.created, format="YYYY-MM-DD HH:mm:ss")),

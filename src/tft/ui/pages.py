@@ -28,19 +28,20 @@ def tokens() -> rx.Component:
                                             "Your token was successfully created. Make sure to copy it now, "
                                             "it won't be shown again.",
                                         ),
-                                        rx.table.root(
-                                            rx.table.header(
-                                                rx.table.row(
-                                                    rx.table.column_header_cell("API Token"),
-                                                ),
-                                                align="center",
+                                        rx.hstack(
+                                            rx.code(State.created_token.api_key, size="2", color_scheme="blue"),
+                                            rx.icon_button(
+                                                rx.icon(tag="copy", size=14),
+                                                size="1",
+                                                variant="ghost",
+                                                color_scheme="blue",
+                                                on_click=[
+                                                    rx.set_clipboard(State.created_token.api_key),
+                                                    rx.toast("Token value copied to clipboard."),
+                                                ],
                                             ),
-                                            rx.table.body(
-                                                rx.table.row(
-                                                    rx.table.row_header_cell(State.created_token.api_key),
-                                                ),
-                                                align="center",
-                                            ),
+                                            align="center",
+                                            spacing="2",
                                         ),
                                         align="center",
                                     ),
@@ -56,7 +57,6 @@ def tokens() -> rx.Component:
                                 rx.table.root(
                                     rx.table.header(
                                         rx.table.row(
-                                            rx.table.column_header_cell("ID"),
                                             rx.table.column_header_cell("Name"),
                                             rx.table.column_header_cell("Ranch"),
                                             rx.table.column_header_cell("Role"),
