@@ -12,6 +12,17 @@ from tft.ui.config import settings
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
 
+# Human-readable labels for known ranches. Ranches not listed here fall back to
+# a capitalized version of their value, so new ranches work without a code change.
+# TODO: the list of available ranches (and their labels) should be detected from
+# the Testing Farm API instead of being hardcoded here.
+RANCH_LABELS = {
+    'public': 'Public',
+    'redhat': 'Red Hat',
+    'nvidia': 'NVIDIA',
+    'fedora-amd': 'Fedora AMD',
+}
+
 
 class AuthorizedUser(rx.Base):
     auth_id: str
@@ -289,16 +300,20 @@ class State(rx.State):
             self.show_created_token_state = 0
 
     @rx.var
-    def ranch_redhat_allowed(self) -> bool:
-        if self.authorized_user and self.authorized_user.ranch:
-            return 'redhat' in self.authorized_user.ranch
-        return False
+    def allowed_ranches(self) -> list[dict[str, str]]:
+        """Ranches the user is allowed to create tokens for, as select options."""
+        if not (self.authorized_user and self.authorized_user.ranch):
+            return []
+        return [
+            {'value': ranch, 'label': RANCH_LABELS.get(ranch, ranch.capitalize())}
+            for ranch in self.authorized_user.ranch
+        ]
 
     @rx.var
-    def ranch_public_allowed(self) -> bool:
+    def default_ranch(self) -> str:
         if self.authorized_user and self.authorized_user.ranch:
-            return 'public' in self.authorized_user.ranch
-        return False
+            return self.authorized_user.ranch[0]
+        return ''
 
     @rx.var
     def role_admin(self) -> bool:

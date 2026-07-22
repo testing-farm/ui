@@ -136,11 +136,13 @@ def create_token_dialog() -> rx.Component:
                                 rx.select.trigger(),
                                 rx.select.content(
                                     rx.select.group(
-                                        rx.cond(State.ranch_public_allowed, rx.select.item('Public', value='public')),
-                                        rx.cond(State.ranch_redhat_allowed, rx.select.item('Red Hat', value='redhat')),
+                                        rx.foreach(
+                                            State.allowed_ranches,
+                                            lambda ranch: rx.select.item(ranch['label'], value=ranch['value']),
+                                        ),
                                     ),
                                 ),
-                                default_value='public',
+                                default_value=State.default_ranch,
                                 name="ranch",
                             ),
                             rx.cond(
