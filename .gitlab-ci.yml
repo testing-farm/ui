@@ -26,9 +26,6 @@ workflow:
 container:
   stage: tests
   extends: .quay
-  variables:
-    GOSS_PATH: /usr/bin/goss
-    GOSS_DOWNLOAD_URL: https://github.com/goss-org/goss/releases/download/v0.3.21
   script:
     - dnf -y install make python3.9 podman-docker
     - curl -sSL https://install.python-poetry.org | python3 - --version 1.4.2
